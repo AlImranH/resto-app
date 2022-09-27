@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ReservationMail;
 use App\Models\Category;
 use App\Models\Menu;
 use App\Models\Reservation;
 use App\Models\Table;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class FrontendController extends Controller
 {
@@ -71,8 +74,25 @@ class FrontendController extends Controller
         $reservation = $request->session()->get('reservation');
         $reservation->fill($validated);
         $reservation->save();
-        $request->session()->forget('reservation');
+        $table = Table::findOrFail($request->table_id);
+        $table->update(['status' => 'pending']);
+        // dd(env('APP_URL') . Storage::url($request->session()->get('menu')->image));
+        $details = [
+            'first_name' => $request->session()->get('reservation')->first_name,
+            'last_name' => $request->session()->get('reservation')->last_name,
+            'email' => $request->session()->get('reservation')->email,
+            'tel_number' => $request->session()->get('reservation')->tel_number,
+            'guest_number' => $request->session()->get('reservation')->guest_number,
+            'table' => $table->name,
+            'res_date' => $request->session()->get('reservation')->res_date,
+            'menu_img' => env('APP_URL') . Storage::url($request->session()->get('menu')->image)
+        ];
 
-        return redirect()->route('index')->with('thankyou', 'Thank you');
+        Mail::to($request->session()->get('reservation')->email)->send(new ReservationMail($details));
+
+        $request->session()->forget('reservation');
+        $request->session()->forget('menu');
+
+        return redirect()->route('index')->with('success', 'Thank you');
     }
 }

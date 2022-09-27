@@ -19,6 +19,7 @@
                             <th scope="col">Name</th>
                             <th scope="col">Number of Guest</th>
                             <th scope="col">Location</th>
+                            <th scope="col">Status</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
@@ -29,6 +30,8 @@
                                 <td>{{ $table->name }}</td>
                                 <td>{{ $table->guest_number }}</td>
                                 <td>{{ $table->location }}</td>
+                                <td>{{ $table->status }}</td>
+
                                 <td class="d-flex">
                                   <a href="{{ route('tables.edit', $table->id) }}" class="btn btn-sm btn-warning m-1" title="Edit"><i class="far fa-edit"></i></a>
         
